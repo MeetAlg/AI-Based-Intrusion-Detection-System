@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SOC Dashboard</title>
+    <style>
+        body {
+            background: black;
+            color: lime;
+            font-family: monospace;
+        }
+        h1 {
+            color: red;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            color: red;
+            border-bottom: 1px solid red;
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #222;
+        }
+    </style>
+</head>
+<body>
+
+<h1>💀 LIVE SOC MONITORING DASHBOARD 💀</h1>
+
+<h2>
+    🚨 Attacks Detected: <span id="attackCount">0</span> |
+    ✅ Normal Traffic: <span id="normalCount">0</span>
+</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Source IP</th>
+            <th>Destination IP</th>
+            <th>Protocol</th>
+            <th>Result</th>
+        </tr>
+    </thead>
+    <tbody id="logTable">
+    </tbody>
+</table>
+
+<script>
+function fetchLiveData() {
+    fetch("/live_data")
+        .then(response => response.json())
+        .then(data => {
+
+            console.log("LIVE DATA:", data); // ✅ Debug
+
+            document.getElementById("attackCount").innerText = data.attacks;
+            document.getElementById("normalCount").innerText = data.logs.length - data.attacks;
+
+            let tableBody = document.getElementById("logTable");
+            tableBody.innerHTML = "";
+
+            data.logs.slice().reverse().forEach(log => {
+                let row = `
+                    <tr>
+                        <td>${log.src}</td>
+                        <td>${log.dst}</td>
+                        <td>${log.proto}</td>
+                        <td>${log.result}</td>
+                    </tr>`;
+                tableBody.innerHTML += row;
+            });
+
+        })
+        .catch(error => console.error("ERROR:", error));
+}
+
+setInterval(fetchLiveData, 1000);
+</script>
+
+</body>
+</html>
